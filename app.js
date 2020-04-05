@@ -4,6 +4,7 @@ var bodyParser = require('body-parser');
 const app = express();
 var _ = require('lodash');
 const signUp = require('./routes/signUp');
+const slots = require('./routes/slots');
 const error = require('./middlewares/error');
 
 
@@ -22,6 +23,9 @@ app.use(bodyParser.json({ limit: "100mb", extended: true, parameterLimit: 100000
 
 app.post('/signUp', signUp);
 app.post('/login', signUp);
+app.post('/defineSlots', slots);
+app.put('/modifySlots', slots);
+app.get('/getSlots', slots);
 app.use(error);
 
 app.listen(PORT, () => {

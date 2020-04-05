@@ -1,17 +1,28 @@
-function verifyHeader(req, res, next) {
-  if(req.path.indexOf('/download') > -1){
-  	next();
-  }else{
-	  console.log("headersssssssssss",req.headers);
-	  if (!req.headers.authorization) {
-	    return res.status(401).send('Unauthorized request');
-	  }
-	  var access_token = req.headers.authorization.split(' ')[1];
-	  if (!access_token) {
-	    return res.status(401).send('Unauthorized request');
-	  } 
-	  next();
-  }
+const auth_config = require('./../configs/auth_config');
+const jwt = require('jsonwebtoken');
+function verifyToken(req, res, next) {
+	if (!req.headers.authorization) {
+		return res.status(401).send({ "error": "Unauthorized request" });
+	}
+	var access_token = req.headers.authorization.split(' ')[1];
+	if (!access_token) {
+		return res.status(401).send({ "error": "Access token is empty" });
+	}
+	else {
+		jwt.verify(access_token, auth_config.secret, (err, token) => {
+			if (err) {
+				return res.status(401).send({
+					"error": "Invalid authentication token"
+				});
+			}
+			else {
+				res.locals.userId = token;
+				next();
+			}
+		});
+	}
+
 }
 
-module.exports = verifyHeader;
+
+module.exports = verifyToken;
