@@ -31,6 +31,6 @@ app.post('/bookSlots', bookSlots);
 app.get('/getAvailableSlots', slots);
 app.use(error);
 
-app.listen(PORT, () => {
+app.listen(process.env.PORT || PORT, () => {
   console.log("Server running on port " + PORT);
 });
