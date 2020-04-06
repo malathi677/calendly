@@ -194,7 +194,6 @@ router.get('/getAvailableSlots', verifyHeader, function (req, res) {
                 return res.send({ error: "Something went wrong" });
             }
             else {
-                console.log("defined slots", slots_res);
                 if (slots_res != null && slots_res.slots && _.isEmpty(slots_res.slots) != true) {
                     let dateTimeStamp = Math.round(new Date(req.query.date).getTime() / 1000);
                     let bookedSlotQuery = {};
@@ -207,7 +206,6 @@ router.get('/getAvailableSlots', verifyHeader, function (req, res) {
                             return res.send({ "error": "something went wrong." });
                         }
                         else {
-                            console.log("bookedslots res isss***************", bookedSlots_res);
                             if (bookedSlots_res.length > 0) {
 
                                 let data = [];
