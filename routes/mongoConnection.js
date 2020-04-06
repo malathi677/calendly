@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const url_config = require('./../configs/url_config.json');
 //require database URL from properties file
-const dbURL = url_config.MONGO_CONFIG.url;
+const dbURL = process.env.MONGODB_URI + '/heroku_4z8grl6n' || url_config.MONGO_CONFIG.url;
 
 mongoose.connect(dbURL, { useNewUrlParser: true, useUnifiedTopology: true });
 
