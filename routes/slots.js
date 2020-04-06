@@ -6,9 +6,20 @@ const verifyHeader = require('../middlewares/verifyHeader');
 const slots = require('../model/defineSlots');
 const bookedSlots = require('./../model/bookSlots');
 
+/**
+ * @function formatSlotsDataFromUser
+ * @param {Array} body
+ * @param {object} slotsData
+ * @return {object}
+ * @description Checking any field is empty or not and 
+ * converting time string to numeric format to store in DB
+ */
 function formatSlotsDataFromUser(body, slotsData) {
+
     let flag = 0;
+
     body.map(item => {
+
         if (item.day && item.day != null && item.start && item.start != null && item.end && item.end != null) {
             let day = item.day.toLowerCase();
             delete item.day;
@@ -19,19 +30,28 @@ function formatSlotsDataFromUser(body, slotsData) {
         else {
             flag++;
         }
+
     });
-    if (flag > 0 && flag < body.length) {
-        return [];
+
+    if (flag > 0 && flag <= body.length) {
+        return {};
     }
     else {
         return slotsData;
     }
 }
 
+/**
+ * @function formatSlotsToDisplay
+ * @param {object} data
+ * @return {Array}
+ * @description converting numeric time to string format(HH:mm) to display to the user
+ */
 
 function formatSlotsToDisplay(data) {
-    //console.log("data", data);
+
     let definedSlots = [];
+
     Object.entries(data).forEach(entry => {
         let obj = {};
         obj.day = entry[0];
@@ -39,8 +59,17 @@ function formatSlotsToDisplay(data) {
         obj.end_time = moment(entry[1].end / 60, 'HH').format('HH:mm');
         definedSlots.push(obj);
     });
+
     return definedSlots;
+
 }
+
+/**
+ * @function checkDate
+ * @param {date} date
+ * @return {object}
+ * @description Checking user has given past date or not.If not proceeding further.
+ */
 
 function checkDate(date) {
     let today = new Date().toISOString().substr(0, 10);
@@ -54,6 +83,9 @@ function checkDate(date) {
     }
 }
 
+
+
+//To define available slots of a day or mulitple days
 router.post('/defineSlots', verifyHeader, function (req, res) {
     let slotsData = new slots();
     slotsData.slots = {};
@@ -62,7 +94,7 @@ router.post('/defineSlots', verifyHeader, function (req, res) {
     }
     if (req.body && req.body.length > 0) {
         let formattedSlotsData = formatSlotsDataFromUser(req.body, slotsData);
-        if (formattedSlotsData.length == 0) {
+        if (_.isEmpty(formattedSlotsData) == true) {
             return res.send({ error: "Please provide proper data.Every field must be filled." });
         }
     }
@@ -92,6 +124,7 @@ router.post('/defineSlots', verifyHeader, function (req, res) {
 });
 
 
+// To get defined slots of individual or some other person.
 router.get('/getDefinedSlots', verifyHeader, function (req, res) {
     let query = {};
 
@@ -121,10 +154,11 @@ router.get('/getDefinedSlots', verifyHeader, function (req, res) {
                 return res.send({ "message": "Slots are not defined yet." })
             }
         }
-    })
-})
+    });
+});
 
 
+//To change any slot which is already defined.
 router.put('/modifySlots', verifyHeader, function (req, res) {
     if (req.body.length > 0) {
         let slotsData = new slots();
@@ -175,7 +209,7 @@ router.put('/modifySlots', verifyHeader, function (req, res) {
     }
 });
 
-
+//To get available slots of a particular person
 router.get('/getAvailableSlots', verifyHeader, function (req, res) {
     let query = {};
     let projectionData = {};
@@ -214,34 +248,30 @@ router.get('/getAvailableSlots', verifyHeader, function (req, res) {
                                     if (bookedSlots_res[i + 1].slots.start > bookedSlots_res[i].slots.end) {
                                         if (bookedSlots_res[i].slots.end >= slots_res["slots"][dateCheck.day].start && bookedSlots_res[i + 1].slots.start < slots_res["slots"][dateCheck.day].end) {
                                             if (bookedSlots_res[i + 1].slots.start - bookedSlots_res[i].slots.end >= 60) {
-                                                let startTime = Math.floor(bookedSlots_res[i].slots.end/60) + ":" + bookedSlots_res[i].slots.end % 60;
-                                                let endTime = Math.floor(bookedSlots_res[i + 1].slots.start/60) + ":" + bookedSlots_res[i + 1].slots.start % 60;
+                                                let startTime = Math.floor(bookedSlots_res[i].slots.end / 60) + ":" + bookedSlots_res[i].slots.end % 60;
+                                                let endTime = Math.floor(bookedSlots_res[i + 1].slots.start / 60) + ":" + bookedSlots_res[i + 1].slots.start % 60;
                                                 data.push({ "start_time": startTime, "end_time": endTime });
                                                 //data.push({ "start_time": moment(bookedSlots_res[i].slots.end / 60, 'HH').format('HH:mm'), "end_time": moment(bookedSlots_res[i + 1].slots.start / 60, 'HH').format('HH:mm') });
                                             }
-
                                         }
-
                                     }
                                 }
-
                                 if (bookedSlots_res[0].slots.start > slots_res["slots"][dateCheck.day].start) {
                                     if (bookedSlots_res[0].slots.start - slots_res["slots"][dateCheck.day].start >= 60) {
-                                        let startTime = Math.floor(slots_res["slots"][dateCheck.day].start/60) + ":" + slots_res["slots"][dateCheck.day].start % 60;
-                                        let endTime = Math.floor(bookedSlots_res[0].slots.start/60) + ":" + bookedSlots_res[0].slots.start % 60;
+                                        let startTime = Math.floor(slots_res["slots"][dateCheck.day].start / 60) + ":" + slots_res["slots"][dateCheck.day].start % 60;
+                                        let endTime = Math.floor(bookedSlots_res[0].slots.start / 60) + ":" + bookedSlots_res[0].slots.start % 60;
                                         data.push({ "start_time": startTime, "end_time": endTime });
                                     }
                                     //data.push({ "start_time": moment(slots_res["slots"][dateCheck.day].start / 60, 'HH').format('HH:mm'), "end_time": moment(bookedSlots_res[0].slots.start / 60, 'HH').format('HH:mm') })
                                 }
                                 if (slots_res["slots"][dateCheck.day].end > bookedSlots_res[bookedSlots_res.length - 1].slots.end && bookedSlots_res[bookedSlots_res.length - 1].slots.end > slots_res["slots"][dateCheck.day].start) {
-                                    
+
                                     if (slots_res["slots"][dateCheck.day].end - bookedSlots_res[bookedSlots_res.length - 1].slots.end >= 60) {
-                                        let startTime = Math.floor(bookedSlots_res[bookedSlots_res.length - 1].slots.end/60) + ":" + bookedSlots_res[bookedSlots_res.length - 1].slots.end % 60;
-                                        let endTime = Math.floor(slots_res["slots"][dateCheck.day].end/60) + ":" + slots_res["slots"][dateCheck.day].end % 60;
+                                        let startTime = Math.floor(bookedSlots_res[bookedSlots_res.length - 1].slots.end / 60) + ":" + bookedSlots_res[bookedSlots_res.length - 1].slots.end % 60;
+                                        let endTime = Math.floor(slots_res["slots"][dateCheck.day].end / 60) + ":" + slots_res["slots"][dateCheck.day].end % 60;
                                         data.push({ "start_time": startTime, "end_time": endTime });
                                     }
                                     //data.push({ "start_time": moment(bookedSlots_res[bookedSlots_res.length - 1].slots.end / 60, 'HH').format('HH:mm'), "end_time": moment(slots_res["slots"][dateCheck.day].end / 60, 'HH').format('HH:mm') })
-
                                 }
                                 if (data.length == 0) {
                                     let availableSlots = formatSlotsToDisplay(slots_res.slots);
