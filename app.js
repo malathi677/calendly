@@ -5,6 +5,7 @@ const app = express();
 var _ = require('lodash');
 const signUp = require('./routes/signUp');
 const slots = require('./routes/slots');
+const bookSlots = require('./routes/bookSlots');
 const error = require('./middlewares/error');
 
 
@@ -25,7 +26,9 @@ app.post('/signUp', signUp);
 app.post('/login', signUp);
 app.post('/defineSlots', slots);
 app.put('/modifySlots', slots);
-app.get('/getSlots', slots);
+app.get('/getDefinedSlots', slots);
+app.post('/bookSlots', bookSlots);
+app.get('/getAvailableSlots', slots);
 app.use(error);
 
 app.listen(PORT, () => {
