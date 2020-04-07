@@ -72,7 +72,7 @@ router.post('/bookSlots', verifyHeader, function (req, res) {
                                             res.send({ "error": "Something went wrong" });
                                         }
                                         else {
-                                            res.send({ "message": "slot booked" });
+                                            res.send({ "message": "slot is booked" });
                                         }
                                     });
                                 }
