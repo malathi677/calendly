@@ -3,7 +3,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const auth_config = require('./../configs/auth_config.json');
 const User = require('../model/user');
-
+const jwtExpireSeconds = 300;
 // User login api 
 router.post('/login', (req, res) => {
   User.findOne({ email: req.body.email }, function (err, user) {
@@ -14,9 +14,11 @@ router.post('/login', (req, res) => {
     }
     else {
       if (user.validPassword(req.body.password)) {
-        jwt.sign(req.body.email, auth_config.secret, (err, token) => {
+        jwt.sign({
+          data: req.body.email
+        }, auth_config.secret, { expiresIn: 60 * 60 }, (err, token) => {
           if (err) {
-
+            return res.send({ "error": "Something went wrong" });
           }
           else {
             return res.status(201).send({

@@ -12,11 +12,11 @@ function verifyToken(req, res, next) {
 		jwt.verify(access_token, auth_config.secret, (err, token) => {
 			if (err) {
 				return res.status(401).send({
-					"error": "Invalid authentication token"
+					"error": err.message
 				});
 			}
 			else {
-				res.locals.userId = token;
+				res.locals.userId = token.data;
 				next();
 			}
 		});
